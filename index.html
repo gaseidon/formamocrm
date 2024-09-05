@@ -4,74 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Форма заявки</title>
+    <link rel="stylesheet" href="public/styles.css">
 </head>
 <body>
-    <h1>Форма заявки</h1>
-    <form id="leadForm">
-        <label for="name">Имя:</label>
-        <input type="text" id="name" name="name" required><br><br>
+    <div class="form-container">
+        <h1>Форма заявки</h1>
+        <form id="leadForm">
+            <div class="form-group">
+                <label for="name">Имя:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br><br>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
 
-        <label for="phone">Телефон:</label>
-        <input type="text" id="phone" name="phone" required><br><br>
+            <div class="form-group">
+                <label for="phone">Телефон:</label>
+                <input type="text" id="phone" name="phone" required>
+            </div>
 
-        <label for="price">Цена:</label>
-        <input type="number" id="price" name="price" required><br><br>
+            <div class="form-group">
+                <label for="price">Цена:</label>
+                <input type="number" id="price" name="price" required>
+            </div>
 
-        <input type="submit" value="Отправить">
-    </form>
+            <input type="submit" value="Отправить" class="submit-btn">
+        </form>
+    </div>
 
-    <script>
-        let timeSpent = false;
-
-        // Отслеживаем, если пользователь проводит на странице больше 30 секунд
-        setTimeout(() => {
-            timeSpent = true; // Пользователь провел на сайте больше 30 секунд
-        }, 30000);
-
-        document.getElementById("leadForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
-
-            // Собираем данные формы
-            const formData = new FormData(this);
-
-            const data = {
-                name: formData.get("name"),
-                email: formData.get("email"),
-                phone: formData.get("phone"),
-                price: formData.get("price"),
-                timeSpent: timeSpent ? 1 : 0 // Передаем информацию о времени
-            };
-
-            try {
-                // Отправляем данные на сервер с помощью fetch
-                const response = await fetch("/send_to_amocrm.php", {
-                    method: "POST",
-                    body: JSON.stringify(data),
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                });
-
-                // Читаем и парсим ответ от сервера
-                const responseData = await response.json();
-
-                // Выводим данные в консоль
-                console.log('Ответ сервера:', responseData);
-
-                if (response.ok) {
-                    alert("Заявка успешно отправлена!");
-                } else {
-                    alert("Произошла ошибка при отправке заявки.");
-                }
-            } catch (error) {
-                // Обработка ошибок
-                console.error('Ошибка при отправке данных:', error);
-                alert("Произошла ошибка при отправке заявки.");
-            }
-        });
-    </script>
+    <script src="public/script.js"></script>
 </body>
 </html>
