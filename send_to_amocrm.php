@@ -1,7 +1,17 @@
 <?php
+
+$access_token = file_get_contents('access_token.txt');
+$your_amocrm_domain = file_get_contents('domain.txt');
+// Получаем или создаем пользовательское поле
+try {
+    $customFieldId = getOrCreateCustomField($access_token, $your_amocrm_domain);
+    // echo "ID пользовательского поля 'Время на сайте': " . $customFieldId;
+} catch (Exception $e) {
+    echo "Ошибка: " . $e->getMessage();
+}
+
 // Функция для получения списка пользовательских полей для сделок
-function getCustomFields($access_token) {
-    $your_amocrm_domain = 'danilgasilow';
+function getCustomFields($access_token, $your_amocrm_domain) {
     $customFieldsUrl = "https://".$your_amocrm_domain.".amocrm.ru/api/v4/leads/custom_fields";
 
     $options = [
@@ -18,8 +28,7 @@ function getCustomFields($access_token) {
 }
 
 // Функция для создания пользовательского поля "Время на сайте" в AmoCRM
-function createCustomField($access_token) {
-    $your_amocrm_domain = 'danilgasilow';
+function createCustomField($access_token, $your_amocrm_domain) {
     $customFieldsUrl = "https://".$your_amocrm_domain.".amocrm.ru/api/v4/leads/custom_fields";
 
     // Данные для создания поля "Время на сайте"
@@ -45,8 +54,8 @@ function createCustomField($access_token) {
 }
 
 // Получение ID пользовательского поля "Время на сайте" или создание его, если не существует
-function getOrCreateCustomField($access_token) {
-    $customFields = getCustomFields($access_token);
+function getOrCreateCustomField($access_token, $your_amocrm_domain) {
+    $customFields = getCustomFields($access_token, $your_amocrm_domain);
 
     foreach ($customFields['_embedded']['custom_fields'] as $field) {
         if ($field['name'] === 'Время на сайте') {
@@ -56,7 +65,7 @@ function getOrCreateCustomField($access_token) {
     }
     
     // Поле не существует, создаем его
-    $fieldResponse = createCustomField($access_token);
+    $fieldResponse = createCustomField($access_token, $your_amocrm_domain);
     
     if (isset($fieldResponse['_embedded']['custom_fields'][0]['id'])) {
         return $fieldResponse['_embedded']['custom_fields'][0]['id'];
@@ -66,24 +75,13 @@ function getOrCreateCustomField($access_token) {
 }
 
 // Получаем токен доступа из файла
-$access_token = file_get_contents('access_token.txt');
 
-// Получаем или создаем пользовательское поле
-try {
-    $customFieldId = getOrCreateCustomField($access_token);
-    // echo "ID пользовательского поля 'Время на сайте': " . $customFieldId;
-} catch (Exception $e) {
-    echo "Ошибка: " . $e->getMessage();
-}
 ?>
 
 
 <?php
 // Функция для создания сделки и контакта в AmoCRM с использованием пользовательского поля "Время на сайте"
-function createDealAndContact($name, $email, $phone, $price, $timeSpent, $customFieldId) {
-    $access_token = file_get_contents('access_token.txt');
-    $your_amocrm_domain = 'danilgasilow';
-    
+function createDealAndContact($name, $email, $phone, $price, $timeSpent, $customFieldId, $access_token, $your_amocrm_domain) {    
     // URL для создания контакта
     $contactsUrl = "https://".$your_amocrm_domain.".amocrm.ru/api/v4/contacts";
     
@@ -169,10 +167,9 @@ $timeSpent = $data['timeSpent'];
 
 // Получаем ID пользовательского поля "Время на сайте"
 try {
-    $access_token = file_get_contents('access_token.txt');
-    $customFieldId = getOrCreateCustomField($access_token);
+    $customFieldId = getOrCreateCustomField($access_token, $your_amocrm_domain);
     // Создаем сделку и контакт с переданным ID пользовательского поля
-    $response = createDealAndContact($name, $email, $phone, $price, $timeSpent, $customFieldId);
+    $response = createDealAndContact($name, $email, $phone, $price, $timeSpent, $customFieldId, $access_token, $your_amocrm_domain);
     
     if (isset($response['_embedded']['leads'][0]['id'])) {
         echo json_encode(['status' => 'success']);
